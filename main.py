@@ -47,7 +47,6 @@ def enregistrer_fichier_csv(livres, nom_du_fichier):
             writer.writerow(livre)
 
 
-
 class Ressources_en_ligne:
 
     def __init__(self):
@@ -77,9 +76,6 @@ class Ressources_en_ligne:
             liste_categorie.append(lien)
             liste_categories_et_urls.append(liste_categorie)
         return liste_categories_et_urls
-
-
-            # categorie_scraper = scrape_page(lien, liste, categorie_nettoye_2)
 
 
 class Categorie:
@@ -215,9 +211,7 @@ def menu_principal():
         2 - CREER UN DOSSIER ZIP DE L'EXTRACTION
         3 - QUITTER L'APPLICATION
         """)
-
     user = input("Veuillez faire votre choix: ")
-
     try:
         user_int = int(user)
         if user_int == 1:
@@ -236,7 +230,6 @@ def menu_principal():
                     liste_infos_livres.append(infos_livre)
                 enregistrer_fichier_csv(liste_infos_livres, livre.category)
                 print(f"Téléchargement terminé de la catégorie {infos[0]}\n")
-
         elif user_int == 2:
             zip_dossier()
             menu_principal()

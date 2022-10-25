@@ -36,10 +36,7 @@ def enregistrer_fichier_csv(livres, nom_du_fichier):
         liste_livres = livres[1]
     except IndexError:
         liste_livres = livres[0]
-    header = []
-    for key in liste_livres.keys():
-        header.append(key)
-
+    header = list(liste_livres.keys())
     with codecs.open(data_file, 'a', encoding="utf-8") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=header)
         writer.writeheader()
@@ -49,8 +46,6 @@ def enregistrer_fichier_csv(livres, nom_du_fichier):
 
 class Ressources_en_ligne:
 
-    def __init__(self):
-        pass
 
 
     def extraire_url_categories(self):
@@ -112,7 +107,7 @@ class Categorie:
 
 
 class Livres:
-    def __init__(self):
+    def __init__(self, titre=""):
         self.titre = ""
         self.category = ""
         self.image_url = ""
@@ -147,13 +142,13 @@ class Livres:
         self.review_rating = div_col_product_main.find("p", class_="star-rating")
         if self.review_rating == div_col_product_main.find("p", class_="star-rating One"):
             self.review_rating = "1 étoile"
-        if self.review_rating == div_col_product_main.find("p", class_="star-rating Two"):
+        elif self.review_rating == div_col_product_main.find("p", class_="star-rating Two"):
             self.review_rating = "2 étoiles"
-        if self.review_rating == div_col_product_main.find("p", class_="star-rating Three"):
+        elif self.review_rating == div_col_product_main.find("p", class_="star-rating Three"):
             self.review_rating = "3 étoiles"
-        if self.review_rating == div_col_product_main.find("p", class_="star-rating Four"):
+        elif self.review_rating == div_col_product_main.find("p", class_="star-rating Four"):
             self.review_rating = "4 étoiles"
-        if self.review_rating == div_col_product_main.find("p", class_="star-rating Five"):
+        elif self.review_rating == div_col_product_main.find("p", class_="star-rating Five"):
             self.review_rating = "5 étoiles"
 
         # description du livre

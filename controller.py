@@ -3,8 +3,9 @@ from models import WebScraper
 
 
 def main():
-    web_scraper = WebScraper()
-    interface = Interface(web_scraper)
+    interface = Interface()
+    web_scraper_instance = WebScraper(interface)
+    interface.set_web_scraper(web_scraper_instance)
     interface.show_interface()
 
 

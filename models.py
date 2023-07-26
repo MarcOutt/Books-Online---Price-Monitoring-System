@@ -12,10 +12,14 @@ SOUP = BeautifulSoup(response.text, "html.parser")
 
 
 class WebScraper:
-    def __init__(self):
+    def __init__(self, interface):
         self.main_folder = self.create_main_file()
+        self.progress = 0
+        self.books = []
+        self.interface = interface
 
-    def create_main_file(self):
+    @staticmethod
+    def create_main_file():
         dossier_books_to_scraps = Path.cwd() / "Books_to_scraps"
         if not Path(dossier_books_to_scraps).exists():
             dossier_books_to_scraps.mkdir()
@@ -29,15 +33,14 @@ class WebScraper:
         print("Formatage du dossier complété")
 
     def save_csv_folder(self, books, folder_name):
+        if not books:
+            print("Aucun livre à enregistrer.")
+            return
 
         csv_files = folder_name + ".csv"
         data_file = self.main_folder / csv_files
         data_file.touch()
-        try:
-            books_list = books[1]
-        except IndexError:
-            books_list = books[0]
-        header = list(books_list.keys())
+        header = list(books[0].keys())
         with codecs.open(data_file, 'a', encoding="utf-8") as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=header)
             writer.writeheader()
@@ -46,47 +49,46 @@ class WebScraper:
 
     def book_scraping(self):
         website = OnlineResource()
-
         categories = website.extract_url_categories()
-        for info in categories:
-            print(f"Téléchargement en cours de la catégorie {info[0]}")
-            category = Category(info[0], info[1])
-            books_url = category.extraire_liste_livres()
+        total_books = sum(len(category.extract_book_list()) for category in categories)
+
+        for category in categories:
+            print(f"Téléchargement en cours de la catégorie {category.nom}")
+            books_url = category.extract_book_list()
             books_info_list = []
             for url in books_url:
-                book = Books()
-                books_info = website.extract_book_info(url)
-                books_info_list.append(books_info)
-            self.save_csv_folder(books_info_list, info[0])
-            print(f"Téléchargement terminé de la catégorie {info[0]}\n")
+                book_info = website.extract_book_info(url)
+                books_info_list.append(book_info)
+                self.progress += 1
+                progress_percentage = (self.progress / total_books) * 100
+                self.interface.update_progress(progress_percentage)
+            self.books.extend(books_info_list)
+            self.save_csv_folder(books_info_list, category.nom)
+            print(f"Téléchargement terminé de la catégorie {category.nom}\n")
         print("Extraction des livres terminée.")
 
 
 class OnlineResource:
     def extract_url_categories(self):
-        """ permet de récupérer les urls des catégories
-        Returns:
-            rien
-        """
         div_container_fluid = SOUP.find("div", class_="container-fluid")
         div_side_categories = div_container_fluid.find("div", class_="side_categories")
         ul_nav = div_side_categories.find("ul", class_="nav")
         ul = ul_nav.find("ul")
         li = ul.find_all("li")
 
-        list_categories_and_urls = []
+        list_categories = []  # Liste pour stocker les instances de la classe Category
+
         for category in li:
-            category_list = []
             a = category.find("a")
-            category = a.text
-            category_clean = category.replace(' ', "")
-            category_clean_2 = category_clean.replace('\n', "")
+            category_clean = a.text.replace(' ', "").replace('\n', "")
             href = a["href"]
             link = BASE_URL + href
-            category_list.append(category_clean_2)
-            category_list.append(link)
-            list_categories_and_urls.append(category_list)
-        return list_categories_and_urls
+
+            # Ajoutez l'instance complète de la classe Category à la liste
+            category_instance = Category(category_clean, link)
+            list_categories.append(category_instance)
+
+        return list_categories
 
     def extract_book_info(self, url_livre):
         """ extrait les infos des livres
@@ -170,33 +172,34 @@ class Category:
     def __init__(self, nom, url_categorie):
         self.nom = nom
         self.url = url_categorie
-        self.liste_livres_urls = []
 
-    def extraire_liste_livres(self):
+    def extract_book_list(self):
         response = requests.get(self.url)
         soup = BeautifulSoup(response.text, "html.parser")
-        section_livre = soup.find("section")
-        ol_livres = section_livre.find("ol", class_="row")
-        li_livres = ol_livres.find_all("li")
-        for li in li_livres:
-            # récupérer l'url du livre
-            div_img_container = li.find("div", class_="image_container")
-            livre_li = div_img_container.find("a")
-            href = livre_li["href"]
+        book_section = soup.find("section")
+        ol_books = book_section.find("ol", class_="row")
+        li_books = ol_books.find_all("li")
+        book_url_list = []  # Liste pour stocker les URLs des livres
 
-            href_nettoye = href.replace("../../../", "")
-            livre_url = CATALOGUE_URL + href_nettoye
-            # ajout des éléments dans une liste
-            self.liste_livres_urls.append(livre_url)
-        li_next = section_livre.find("li", class_="next")
+        for li in li_books:
+            div_img_container = li.find("div", class_="image_container")
+            book_li = div_img_container.find("a")
+            href = book_li["href"]
+
+            href_clean = href.replace("../../../", "")
+            url_book = CATALOGUE_URL + href_clean
+            book_url_list.append(url_book)
+
+        li_next = book_section.find("li", class_="next")
         if li_next is not None:
             a = li_next.find("a")
             href = a["href"]
             u = self.url.split("/")[-1]
             url2 = self.url.replace(u, "")
             self.url = url2 + href
-            self.extraire_liste_livres()
-        return self.liste_livres_urls
+            book_url_list.extend(self.extract_book_list())  # Utilisez extend pour ajouter les URLs des livres suivants
+
+        return book_url_list
 
 
 class Books:

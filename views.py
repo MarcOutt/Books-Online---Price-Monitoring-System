@@ -1,4 +1,3 @@
-import sys
 import tkinter as tk
 import tkinter.filedialog as filedialog
 from tkinter import ttk
@@ -58,6 +57,7 @@ class Interface:
             self.print_message(f"Les livres ont été enregistrés en CSV sous le nom : {filename}.csv")
 
     def show_interface(self):
+        ttk.Style().theme_use('clam')
 
         # Ajoute un fond blanc à la fenêtre principale
         self.root.configure(bg="white")
@@ -73,33 +73,54 @@ class Interface:
         logo_label.pack(padx=20, pady=20)
 
         label = tk.Label(self.root,
-                         text="Logiciel de surveillance des Prix pour le site Books to Scrape",
+                         text="Logiciel de surveillance des Prix",
                          bg="white",
-                         font=("Helvetica", 12))
+                         font=("Times New Roman", 22, 'bold'))
         label.pack(padx=20, pady=20)
 
         btn_scraping = tk.Button(self.root,
                                  text="Lancer le Web Scraping",
+                                 font=("Times New Roman", 16, 'bold'),
                                  bg='#4AA3A2',
-                                 activebackground="#4AA3A2",
+                                 fg='white',
+                                 activebackground="#4A919E",
+                                 width=40,
                                  command=self.executer_web_scraping)
         btn_scraping.pack(padx=10, pady=10)
 
         # Créez une barre de téléchargement (progress bar)
-        self.progress_bar = ttk.Progressbar(self.root, orient=tk.HORIZONTAL, length=300, mode='determinate')
+        self.progress_bar = ttk.Progressbar(self.root,
+                                            orient=tk.HORIZONTAL,
+                                            length=490,
+                                            mode='determinate',
+                                            style="Custom.Horizontal.TProgressbar")
         self.progress_bar.pack(pady=10)
+
+        # Appliquer le style personnalisé à la barre de progression
+        style = ttk.Style()
+        style.configure("Custom.Horizontal.TProgressbar",
+                        troughcolor='white',
+                        background='#4AA3A2',
+                        thickness=50,
+                        )
 
         btn_save_csv = tk.Button(self.root,
                                  text="Enregistrer en CSV",
+                                 font=("Times New Roman", 16, 'bold'),
                                  bg='#CE6A6B',
-                                 activebackground="#CE6A6B",
+                                 fg='white',
+                                 activebackground="#EBACA2",
+                                 width=40,
                                  command=self.save_csv)
         btn_save_csv.pack(padx=10, pady=10)
 
         btn_save_zip = tk.Button(self.root,
                                  text="Enregistrer en ZIP",
+                                 font=("Times New Roman", 16, 'bold'),
                                  bg='orange',
-                                 activebackground="#4AA3A2",
+                                 fg='white',
+                                 activebackground="#F27438",
+                                 width=40,
                                  command=self.save_zip)
         btn_save_zip.pack(padx=10, pady=10)
 
@@ -109,7 +130,7 @@ class Interface:
         self.root.mainloop()
 
     def print_message(self, message):
-        self.message_label.config(text=message)
+        self.message_label.config(text=message, font=("Times New Roman", 12, 'bold'))
 
         if self.text_area:
             self.text_area.insert(tk.END, message + "\n")

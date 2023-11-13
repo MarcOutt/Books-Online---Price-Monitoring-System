@@ -44,7 +44,7 @@ Avant de pouvoir utiliser le projet Books Online, assurez-vous de disposer des �
 
 1. Téléchargez le projet sur votre répertoire local : 
 ```
-git clone https://github.com/MarcOutt/OC_p12.git
+git clone https://github.com/MarcOutt/Books-Online---Price-Monitoring-System.git
 ```
 
 2. Mettez en place un environnement virtuel :
